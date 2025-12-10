@@ -484,6 +484,137 @@ let AdminService = class AdminService {
         await this.prisma.expert_advisors.update({ where: { id }, data: { deleted_at: new Date() } });
         return { success: true, message: 'Expert Advisor deleted successfully' };
     }
+    async getEnrollments(page = 1, limit = 10, status) {
+        const where = {};
+        if (status)
+            where.status = status;
+        const [enrollments, total] = await Promise.all([
+            this.prisma.enrollments.findMany({
+                where,
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: { created_at: 'desc' },
+                include: {
+                    users: { select: { id: true, name: true, email: true } },
+                    courses: { select: { id: true, title: true } },
+                },
+            }),
+            this.prisma.enrollments.count({ where }),
+        ]);
+        return {
+            data: enrollments.map(e => ({
+                ...e,
+                id: e.id.toString(),
+                user_id: e.user_id.toString(),
+                course_id: e.course_id.toString(),
+                users: e.users ? { ...e.users, id: e.users.id.toString() } : null,
+                courses: e.courses ? { ...e.courses, id: e.courses.id.toString() } : null,
+            })),
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+        };
+    }
+    async getEnrollmentById(id) {
+        const enrollment = await this.prisma.enrollments.findUnique({
+            where: { id },
+            include: {
+                users: { select: { id: true, name: true, email: true } },
+                courses: { select: { id: true, title: true } },
+            },
+        });
+        if (!enrollment)
+            return null;
+        return {
+            ...enrollment,
+            id: enrollment.id.toString(),
+            user_id: enrollment.user_id.toString(),
+            course_id: enrollment.course_id.toString(),
+        };
+    }
+    async updateEnrollment(id, data) {
+        const enrollment = await this.prisma.enrollments.update({ where: { id }, data });
+        return { ...enrollment, id: enrollment.id.toString() };
+    }
+    async getPromotions(page = 1, limit = 10) {
+        const [coupons, total] = await Promise.all([
+            this.prisma.coupons.findMany({
+                where: { deleted_at: null },
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: { created_at: 'desc' },
+            }),
+            this.prisma.coupons.count({ where: { deleted_at: null } }),
+        ]);
+        return {
+            data: coupons.map(c => ({
+                id: c.id.toString(),
+                name: c.description || c.code,
+                code: c.code,
+                type: 'coupon',
+                discount_type: c.type,
+                discount_value: Number(c.value),
+                min_purchase: c.min_purchase ? Number(c.min_purchase) : null,
+                max_discount: c.max_discount ? Number(c.max_discount) : null,
+                usage_limit: c.usage_limit,
+                used_count: c.used_count,
+                starts_at: c.valid_from,
+                expires_at: c.valid_until,
+                is_active: c.is_active,
+                created_at: c.created_at,
+            })),
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+        };
+    }
+    async getPromotionById(id) {
+        const coupon = await this.prisma.coupons.findUnique({ where: { id } });
+        if (!coupon)
+            return null;
+        return {
+            id: coupon.id.toString(),
+            name: coupon.description || coupon.code,
+            code: coupon.code,
+            discount_type: coupon.type,
+            discount_value: Number(coupon.value),
+            is_active: coupon.is_active,
+        };
+    }
+    async createPromotion(data) {
+        const coupon = await this.prisma.coupons.create({
+            data: {
+                code: data.code,
+                description: data.name,
+                type: data.discount_type || 'percentage',
+                value: data.discount_value,
+                min_purchase: data.min_purchase || 0,
+                max_discount: data.max_discount,
+                usage_limit: data.usage_limit,
+                valid_from: data.starts_at,
+                valid_until: data.expires_at,
+                is_active: data.is_active ?? true,
+            },
+        });
+        return { ...coupon, id: coupon.id.toString(), discount_value: Number(coupon.value) };
+    }
+    async updatePromotion(id, data) {
+        const updateData = {};
+        if (data.code)
+            updateData.code = data.code;
+        if (data.name)
+            updateData.description = data.name;
+        if (data.discount_type)
+            updateData.type = data.discount_type;
+        if (data.discount_value !== undefined)
+            updateData.value = data.discount_value;
+        if (data.is_active !== undefined)
+            updateData.is_active = data.is_active;
+        if (data.expires_at)
+            updateData.valid_until = data.expires_at;
+        const coupon = await this.prisma.coupons.update({ where: { id }, data: updateData });
+        return { id: coupon.id.toString(), discount_value: Number(coupon.value) };
+    }
+    async deletePromotion(id) {
+        await this.prisma.coupons.update({ where: { id }, data: { deleted_at: new Date() } });
+        return { success: true, message: 'Promotion deleted successfully' };
+    }
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([

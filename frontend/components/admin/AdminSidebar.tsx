@@ -47,7 +47,8 @@ const navigationGroups: NavGroup[] = [
     {
         label: 'จัดการผู้ใช้',
         items: [
-            { name: 'ผู้ใช้งานทั้งหมด', href: '/admin/users', icon: <Users size={20} />, badge: '24' },
+            { name: 'ผู้ใช้งานทั้งหมด', href: '/admin/users', icon: <Users size={20} /> },
+            { name: 'การลงทะเบียนเรียน', href: '/admin/enrollments', icon: <BookOpen size={20} /> },
             { name: 'การสมัครสมาชิก', href: '/admin/subscriptions', icon: <CreditCard size={20} /> },
         ]
     },

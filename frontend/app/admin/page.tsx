@@ -1,227 +1,214 @@
-import { Users, BookOpen, Package, TrendingUp, DollarSign, Eye, ArrowUpRight, ArrowDownRight, Calendar, MoreHorizontal } from 'lucide-react';
+'use client';
 
-// Stats Card Component
-function StatsCard({
-    title,
-    value,
-    icon,
-    change,
-    changeType,
-    gradient
-}: {
-    title: string;
-    value: string;
-    icon: React.ReactNode;
-    change: string;
-    changeType: 'up' | 'down' | 'neutral';
-    gradient: string;
-}) {
-    return (
-        <div className="relative bg-white rounded-2xl p-6 shadow-sm shadow-gray-100 border border-gray-100 overflow-hidden group hover:shadow-lg hover:shadow-gray-100 transition-all duration-300">
-            <div className={`absolute -right-8 -top-8 w-32 h-32 rounded-full ${gradient} opacity-10 group-hover:opacity-20 transition-opacity`}></div>
+import { useState, useEffect } from 'react';
+import { Users, BookOpen, FileText, Package, ShoppingCart, TrendingUp, DollarSign, ArrowUpRight, ArrowDownRight, Loader2, Eye, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
+import { adminDashboard } from '@/lib/admin-api';
 
-            <div className="relative flex items-start justify-between">
-                <div>
-                    <p className="text-sm font-medium text-gray-500">{title}</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
-                    <div className={`flex items-center gap-1 mt-3 text-sm font-medium ${changeType === 'up' ? 'text-emerald-600' :
-                            changeType === 'down' ? 'text-rose-600' :
-                                'text-gray-500'
-                        }`}>
-                        {changeType === 'up' ? <ArrowUpRight size={16} /> : changeType === 'down' ? <ArrowDownRight size={16} /> : null}
-                        {change}
-                    </div>
-                </div>
-                <div className={`p-4 rounded-2xl ${gradient}`}>
-                    <div className="text-white">{icon}</div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// Chart Card
-function ChartCard({ title }: { title: string }) {
-    return (
-        <div className="bg-white rounded-2xl p-6 shadow-sm shadow-gray-100 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <MoreHorizontal size={20} className="text-gray-400" />
-                </button>
-            </div>
-            <div className="h-64 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl">
-                <p className="text-gray-400">กราฟจะแสดงที่นี่</p>
-            </div>
-        </div>
-    );
-}
-
-// Recent Activity
-function RecentActivity() {
-    const activities = [
-        { id: 1, title: 'มีผู้ใช้ใหม่สมัครสมาชิก', user: 'john@example.com', time: '5 นาทีที่แล้ว', color: 'bg-blue-500' },
-        { id: 2, title: 'มีการซื้อคอร์สเรียน', user: 'Jane Smith', time: '15 นาทีที่แล้ว', color: 'bg-emerald-500' },
-        { id: 3, title: 'เผยแพร่บทความใหม่', user: 'Admin', time: '1 ชั่วโมงที่แล้ว', color: 'bg-purple-500' },
-        { id: 4, title: 'อัพเดทสินค้า', user: 'Admin', time: '2 ชั่วโมงที่แล้ว', color: 'bg-orange-500' },
-        { id: 5, title: 'สมัครสมาชิกใหม่', user: 'Mike Johnson', time: '3 ชั่วโมงที่แล้ว', color: 'bg-pink-500' },
-    ];
-
-    return (
-        <div className="bg-white rounded-2xl p-6 shadow-sm shadow-gray-100 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">กิจกรรมล่าสุด</h3>
-                <button className="text-sm text-emerald-600 font-medium hover:text-emerald-700">ดูทั้งหมด</button>
-            </div>
-            <div className="space-y-4">
-                {activities.map((activity) => (
-                    <div key={activity.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
-                        <div className={`w-10 h-10 ${activity.color} rounded-xl flex items-center justify-center`}>
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{activity.title}</p>
-                            <p className="text-xs text-gray-500">{activity.user}</p>
-                        </div>
-                        <p className="text-xs text-gray-400 whitespace-nowrap">{activity.time}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-// Quick Actions
-function QuickActions() {
-    const actions = [
-        { name: 'เพิ่มผู้ใช้', icon: <Users size={20} />, href: '/admin/users/new', gradient: 'from-blue-500 to-blue-600' },
-        { name: 'เพิ่มคอร์ส', icon: <BookOpen size={20} />, href: '/admin/courses/new', gradient: 'from-emerald-500 to-teal-600' },
-        { name: 'เพิ่มบทความ', icon: <Eye size={20} />, href: '/admin/articles/new', gradient: 'from-purple-500 to-purple-600' },
-        { name: 'เพิ่มสินค้า', icon: <Package size={20} />, href: '/admin/products/new', gradient: 'from-orange-500 to-orange-600' },
-    ];
-
-    return (
-        <div className="bg-white rounded-2xl p-6 shadow-sm shadow-gray-100 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">ทางลัด</h3>
-            <div className="grid grid-cols-2 gap-3">
-                {actions.map((action) => (
-                    <a
-                        key={action.name}
-                        href={action.href}
-                        className={`flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r ${action.gradient} text-white hover:shadow-lg hover:scale-[1.02] transition-all duration-200`}
-                    >
-                        {action.icon}
-                        <span className="text-sm font-medium">{action.name}</span>
-                    </a>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-// Top Content Card
-function TopContentCard({ title, items }: {
-    title: string;
-    items: { name: string; value: string; subValue: string }[]
-}) {
-    return (
-        <div className="bg-white rounded-2xl p-6 shadow-sm shadow-gray-100 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                <button className="text-sm text-emerald-600 font-medium hover:text-emerald-700">ดูทั้งหมด</button>
-            </div>
-            <div className="space-y-4">
-                {items.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
-                        <div className="flex items-center gap-4">
-                            <span className="w-8 h-8 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-bold">
-                                {i + 1}
-                            </span>
-                            <div>
-                                <p className="font-medium text-gray-900">{item.name}</p>
-                                <p className="text-sm text-gray-500">{item.subValue}</p>
-                            </div>
-                        </div>
-                        <span className="text-lg font-bold text-emerald-600">{item.value}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+interface DashboardStats {
+    users: number;
+    courses: number;
+    articles: number;
+    products: number;
+    ebooks: number;
+    orders: number;
+    revenue: number;
+    enrollments: number;
 }
 
 export default function AdminDashboard() {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        loadStats();
+    }, []);
+
+    const loadStats = async () => {
+        setIsLoading(true);
+        try {
+            const result = await adminDashboard.getStats();
+            if (result.data) {
+                setStats(result.data);
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+        setIsLoading(false);
+    };
+
+    const statCards = [
+        { label: 'ผู้ใช้ทั้งหมด', value: stats?.users || 0, icon: <Users size={24} />, color: 'from-blue-500 to-cyan-600', link: '/admin/users', trend: '+12%' },
+        { label: 'คอร์สเรียน', value: stats?.courses || 0, icon: <BookOpen size={24} />, color: 'from-purple-500 to-pink-600', link: '/admin/courses', trend: '+8%' },
+        { label: 'บทความ', value: stats?.articles || 0, icon: <FileText size={24} />, color: 'from-emerald-500 to-teal-600', link: '/admin/articles', trend: '+5%' },
+        { label: 'สินค้า', value: stats?.products || 0, icon: <Package size={24} />, color: 'from-orange-500 to-pink-600', link: '/admin/products', trend: '+3%' },
+        { label: 'E-books', value: stats?.ebooks || 0, icon: <BookOpen size={24} />, color: 'from-teal-500 to-emerald-600', link: '/admin/ebooks', trend: '+7%' },
+        { label: 'การลงทะเบียน', value: stats?.enrollments || 0, icon: <TrendingUp size={24} />, color: 'from-indigo-500 to-purple-600', link: '/admin/enrollments', trend: '+15%' },
+    ];
+
+    const quickLinks = [
+        { label: 'เพิ่มผู้ใช้ใหม่', href: '/admin/users', color: 'bg-blue-500' },
+        { label: 'สร้างคอร์ส', href: '/admin/courses', color: 'bg-purple-500' },
+        { label: 'เขียนบทความ', href: '/admin/articles', color: 'bg-emerald-500' },
+        { label: 'เพิ่มสินค้า', href: '/admin/products', color: 'bg-orange-500' },
+        { label: 'เพิ่ม Indicator', href: '/admin/indicators', color: 'bg-cyan-500' },
+        { label: 'เพิ่ม EA', href: '/admin/expert-advisors', color: 'bg-pink-500' },
+    ];
+
     return (
         <div className="space-y-8">
-            {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">แดชบอร์ด</h1>
-                    <p className="text-gray-500 mt-1">ยินดีต้อนรับกลับมา! นี่คือภาพรวมของแพลตฟอร์ม</p>
+                    <p className="text-gray-500 mt-1">ภาพรวมข้อมูลระบบ LongTrade</p>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-gray-200 text-sm text-gray-600">
-                    <Calendar size={18} />
-                    <span>9 ธ.ค. 2567</span>
+                <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-500">อัปเดตล่าสุด: {new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                    <button
+                        onClick={loadStats}
+                        className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-gray-700 flex items-center gap-2"
+                    >
+                        {isLoading ? <Loader2 className="animate-spin" size={16} /> : <BarChart3 size={16} />}
+                        รีเฟรช
+                    </button>
                 </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatsCard
-                    title="ผู้ใช้ทั้งหมด"
-                    value="1,234"
-                    icon={<Users size={24} />}
-                    change="+12.5% จากเดือนที่แล้ว"
-                    changeType="up"
-                    gradient="bg-gradient-to-r from-blue-500 to-blue-600"
-                />
-                <StatsCard
-                    title="คอร์สเรียน"
-                    value="48"
-                    icon={<BookOpen size={24} />}
-                    change="+3 คอร์สใหม่"
-                    changeType="up"
-                    gradient="bg-gradient-to-r from-purple-500 to-purple-600"
-                />
-                <StatsCard
-                    title="สินค้าทั้งหมด"
-                    value="156"
-                    icon={<Package size={24} />}
-                    change="+8 สินค้าใหม่"
-                    changeType="up"
-                    gradient="bg-gradient-to-r from-orange-500 to-orange-600"
-                />
-                <StatsCard
-                    title="รายได้"
-                    value="฿245K"
-                    icon={<DollarSign size={24} />}
-                    change="+18.2% จากเดือนที่แล้ว"
-                    changeType="up"
-                    gradient="bg-gradient-to-r from-emerald-500 to-teal-600"
-                />
+            {isLoading ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm animate-pulse">
+                            <div className="h-12 w-12 bg-gray-200 rounded-xl mb-4"></div>
+                            <div className="h-8 w-16 bg-gray-200 rounded mb-2"></div>
+                            <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {statCards.map((stat, i) => (
+                        <Link
+                            key={i}
+                            href={stat.link}
+                            className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg hover:scale-105 transition-all group"
+                        >
+                            <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform`}>
+                                {stat.icon}
+                            </div>
+                            <p className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                                {stat.value.toLocaleString()}
+                            </p>
+                            <div className="flex items-center justify-between mt-2">
+                                <p className="text-sm text-gray-500">{stat.label}</p>
+                                <span className="text-xs text-emerald-500 flex items-center gap-0.5">
+                                    <ArrowUpRight size={12} /> {stat.trend}
+                                </span>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            )}
+
+            {/* Revenue Card */}
+            <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22none%22 stroke=%22white%22 stroke-width=%220.5%22 opacity=%220.1%22/></svg>')] bg-repeat opacity-50"></div>
+                <div className="relative z-10">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <p className="text-white/70 text-sm mb-2">รายได้รวมเดือนนี้</p>
+                            <p className="text-5xl font-bold">
+                                ฿{(stats?.revenue || 0).toLocaleString()}
+                            </p>
+                            <p className="mt-3 flex items-center gap-2 text-emerald-300">
+                                <span className="bg-emerald-400/20 px-2 py-0.5 rounded-full text-xs flex items-center gap-1">
+                                    <ArrowUpRight size={12} /> +24.5%
+                                </span>
+                                <span className="text-white/60 text-sm">vs เดือนก่อน</span>
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="text-center">
+                                <p className="text-4xl font-bold">{stats?.orders || 0}</p>
+                                <p className="text-white/70 text-sm mt-1">คำสั่งซื้อ</p>
+                            </div>
+                            <div className="w-px h-16 bg-white/20"></div>
+                            <div className="text-center">
+                                <p className="text-4xl font-bold">{stats?.enrollments || 0}</p>
+                                <p className="text-white/70 text-sm mt-1">ลงทะเบียน</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                    <ChartCard title="ภาพรวมรายได้" />
+            {/* Quick Links */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">ทางลัด</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {quickLinks.map((link, i) => (
+                        <Link
+                            key={i}
+                            href={link.href}
+                            className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-gray-700 font-medium text-sm"
+                        >
+                            <span className={`w-2 h-2 rounded-full ${link.color}`}></span>
+                            {link.label}
+                        </Link>
+                    ))}
                 </div>
-                <QuickActions />
             </div>
 
-            {/* Bottom Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                    <RecentActivity />
+            {/* Recent Activity Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Recent Users */}
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold text-gray-900">ผู้ใช้ใหม่</h2>
+                        <Link href="/admin/users" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                            ดูทั้งหมด <ArrowUpRight size={14} />
+                        </Link>
+                    </div>
+                    <div className="space-y-4">
+                        {[1, 2, 3].map((_, i) => (
+                            <div key={i} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center text-white font-bold">
+                                    U
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-gray-900 truncate">ผู้ใช้ตัวอย่าง {i + 1}</p>
+                                    <p className="text-sm text-gray-500">user{i + 1}@example.com</p>
+                                </div>
+                                <span className="text-xs text-gray-400">วันนี้</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <TopContentCard
-                    title="คอร์สยอดนิยม"
-                    items={[
-                        { name: 'พื้นฐานการเทรด Forex', value: '฿89K', subValue: '456 ผู้เรียน' },
-                        { name: 'Technical Analysis', value: '฿67K', subValue: '389 ผู้เรียน' },
-                        { name: 'Risk Management', value: '฿45K', subValue: '321 ผู้เรียน' },
-                    ]}
-                />
+
+                {/* Recent Orders */}
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold text-gray-900">คำสั่งซื้อล่าสุด</h2>
+                        <Link href="/admin/enrollments" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                            ดูทั้งหมด <ArrowUpRight size={14} />
+                        </Link>
+                    </div>
+                    <div className="space-y-4">
+                        {[1, 2, 3].map((_, i) => (
+                            <div key={i} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white">
+                                    <ShoppingCart size={18} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-gray-900 truncate">คำสั่งซื้อ #{1000 + i}</p>
+                                    <p className="text-sm text-gray-500">สินค้า {i + 1} รายการ</p>
+                                </div>
+                                <span className="text-emerald-600 font-semibold">฿{(990 * (i + 1)).toLocaleString()}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );

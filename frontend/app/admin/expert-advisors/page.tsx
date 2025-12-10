@@ -1,30 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Eye, BookMarked, Download, Star, Loader2, X, Save, DollarSign, FileText } from 'lucide-react';
-import { adminEbooks, adminCategories } from '@/lib/admin-api';
+import { Plus, Search, Edit, Trash2, Eye, Bot, Download, Star, Loader2, X, Save, DollarSign, Cpu } from 'lucide-react';
+import { adminExpertAdvisors } from '@/lib/admin-api';
 
-interface Ebook {
+interface ExpertAdvisor {
     id: string;
     title: string;
     slug: string;
     description?: string;
-    author?: string;
-    cover_image?: string;
+    image?: string;
     price: number;
     original_price?: number;
-    pages?: number;
-    format: string;
+    platform: string;
+    features?: string;
+    strategy?: string;
     is_published: boolean;
     is_featured: boolean;
     downloads_count: number;
-    views_count: number;
     average_rating: number;
     created_at: string;
 }
 
-export default function EbooksPage() {
-    const [ebooks, setEbooks] = useState<Ebook[]>([]);
+export default function ExpertAdvisorsPage() {
+    const [eas, setEas] = useState<ExpertAdvisor[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
@@ -33,7 +32,7 @@ export default function EbooksPage() {
     // Modal states
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
-    const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
+    const [selectedEA, setSelectedEA] = useState<ExpertAdvisor | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     // Form data
@@ -41,56 +40,56 @@ export default function EbooksPage() {
         title: '',
         slug: '',
         description: '',
-        author: '',
         price: 0,
         original_price: 0,
-        pages: 0,
-        format: 'pdf',
+        platform: 'MT4',
+        features: '',
+        strategy: '',
         is_published: false,
         is_featured: false,
     });
 
     useEffect(() => {
-        loadEbooks();
+        loadEAs();
     }, [page]);
 
-    const loadEbooks = async () => {
+    const loadEAs = async () => {
         setIsLoading(true);
-        const result = await adminEbooks.getAll({ page, limit: 12 });
+        const result = await adminExpertAdvisors.getAll({ page, limit: 12 });
         if (result.data) {
-            setEbooks(result.data.data || result.data || []);
+            setEas(result.data.data || result.data || []);
             setTotal(result.data.meta?.total || result.data.length || 0);
         }
         setIsLoading(false);
     };
 
     const openCreateModal = () => {
-        setFormData({ title: '', slug: '', description: '', author: '', price: 0, original_price: 0, pages: 0, format: 'pdf', is_published: false, is_featured: false });
-        setSelectedEbook(null);
+        setFormData({ title: '', slug: '', description: '', price: 0, original_price: 0, platform: 'MT4', features: '', strategy: '', is_published: false, is_featured: false });
+        setSelectedEA(null);
         setModalMode('create');
         setShowModal(true);
     };
 
-    const openEditModal = (ebook: Ebook) => {
+    const openEditModal = (ea: ExpertAdvisor) => {
         setFormData({
-            title: ebook.title || '',
-            slug: ebook.slug || '',
-            description: ebook.description || '',
-            author: ebook.author || '',
-            price: ebook.price || 0,
-            original_price: ebook.original_price || 0,
-            pages: ebook.pages || 0,
-            format: ebook.format || 'pdf',
-            is_published: ebook.is_published || false,
-            is_featured: ebook.is_featured || false,
+            title: ea.title || '',
+            slug: ea.slug || '',
+            description: ea.description || '',
+            price: ea.price || 0,
+            original_price: ea.original_price || 0,
+            platform: ea.platform || 'MT4',
+            features: ea.features || '',
+            strategy: ea.strategy || '',
+            is_published: ea.is_published || false,
+            is_featured: ea.is_featured || false,
         });
-        setSelectedEbook(ebook);
+        setSelectedEA(ea);
         setModalMode('edit');
         setShowModal(true);
     };
 
-    const openViewModal = (ebook: Ebook) => {
-        setSelectedEbook(ebook);
+    const openViewModal = (ea: ExpertAdvisor) => {
+        setSelectedEA(ea);
         setModalMode('view');
         setShowModal(true);
     };
@@ -102,58 +101,58 @@ export default function EbooksPage() {
         try {
             const submitData = { ...formData, slug: formData.slug || formData.title.toLowerCase().replace(/\s+/g, '-') };
             if (modalMode === 'create') {
-                await adminEbooks.create(submitData);
-            } else if (modalMode === 'edit' && selectedEbook) {
-                await adminEbooks.update(parseInt(selectedEbook.id), submitData);
+                await adminExpertAdvisors.create(submitData);
+            } else if (modalMode === 'edit' && selectedEA) {
+                await adminExpertAdvisors.update(parseInt(selectedEA.id), submitData);
             }
             setShowModal(false);
-            loadEbooks();
+            loadEAs();
         } catch (error) {
-            console.error('Error saving ebook:', error);
+            console.error('Error saving EA:', error);
             alert('เกิดข้อผิดพลาดในการบันทึก');
         }
 
         setIsSaving(false);
     };
 
-    const handleDelete = async (ebook: Ebook) => {
-        if (confirm(`คุณต้องการลบ Ebook "${ebook.title}" หรือไม่?`)) {
-            await adminEbooks.delete(parseInt(ebook.id));
-            loadEbooks();
+    const handleDelete = async (ea: ExpertAdvisor) => {
+        if (confirm(`คุณต้องการลบ EA "${ea.title}" หรือไม่?`)) {
+            await adminExpertAdvisors.delete(parseInt(ea.id));
+            loadEAs();
         }
     };
 
-    const filteredEbooks = ebooks.filter(ebook =>
-        !searchQuery || ebook.title?.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredEAs = eas.filter(ea =>
+        !searchQuery || ea.title?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const publishedCount = ebooks.filter(e => e.is_published).length;
-    const totalDownloads = ebooks.reduce((sum, e) => sum + (e.downloads_count || 0), 0);
+    const publishedCount = eas.filter(e => e.is_published).length;
+    const totalDownloads = eas.reduce((sum, e) => sum + (e.downloads_count || 0), 0);
 
     return (
         <div className="space-y-6">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">จัดการ E-books</h1>
-                    <p className="text-gray-500 mt-1">จัดการหนังสืออิเล็กทรอนิกส์</p>
+                    <h1 className="text-3xl font-bold text-gray-900">จัดการ Expert Advisors</h1>
+                    <p className="text-gray-500 mt-1">จัดการ EA สำหรับ MetaTrader</p>
                 </div>
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-teal-500/25 transition-all font-medium"
+                    className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-medium"
                 >
                     <Plus size={20} />
-                    <span>เพิ่ม E-book ใหม่</span>
+                    <span>เพิ่ม EA ใหม่</span>
                 </button>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { label: 'E-books ทั้งหมด', value: total, color: 'from-teal-500 to-emerald-600', icon: <BookMarked size={20} /> },
+                    { label: 'EA ทั้งหมด', value: total, color: 'from-purple-500 to-pink-600', icon: <Bot size={20} /> },
                     { label: 'เผยแพร่แล้ว', value: publishedCount, color: 'from-emerald-500 to-teal-600', icon: <Eye size={20} /> },
-                    { label: 'ดาวน์โหลดรวม', value: totalDownloads, color: 'from-blue-500 to-cyan-600', icon: <Download size={20} /> },
-                    { label: 'ร่าง', value: total - publishedCount, color: 'from-gray-500 to-gray-600', icon: <FileText size={20} /> },
+                    { label: 'ดาวน์โหลดรวม', value: totalDownloads, color: 'from-blue-500 to-indigo-600', icon: <Download size={20} /> },
+                    { label: 'แนะนำ', value: eas.filter(e => e.is_featured).length, color: 'from-amber-500 to-orange-600', icon: <Star size={20} /> },
                 ].map((stat, i) => (
                     <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
                         <div className="flex items-center justify-between">
@@ -173,79 +172,77 @@ export default function EbooksPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                     <input
                         type="text"
-                        placeholder="ค้นหา E-book..."
+                        placeholder="ค้นหา Expert Advisor..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                        className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
                     />
                 </div>
             </div>
 
-            {/* Ebooks Grid */}
+            {/* EAs Grid */}
             {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                    <Loader2 className="w-8 h-8 text-teal-500 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
                 </div>
-            ) : filteredEbooks.length === 0 ? (
+            ) : filteredEAs.length === 0 ? (
                 <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center">
-                    <BookMarked className="mx-auto text-gray-300 mb-4" size={48} />
-                    <p className="text-gray-500">ไม่พบ E-book</p>
+                    <Bot className="mx-auto text-gray-300 mb-4" size={48} />
+                    <p className="text-gray-500">ไม่พบ Expert Advisor</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredEbooks.map((ebook) => (
-                        <div key={ebook.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all group">
+                    {filteredEAs.map((ea) => (
+                        <div key={ea.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all group">
                             {/* Cover */}
-                            <div className="h-52 bg-gradient-to-br from-teal-500 to-emerald-600 relative overflow-hidden">
-                                {ebook.cover_image ? (
-                                    <img src={ebook.cover_image} alt={ebook.title} className="w-full h-full object-cover" />
+                            <div className="h-48 bg-gradient-to-br from-purple-500 to-pink-600 relative overflow-hidden">
+                                {ea.image ? (
+                                    <img src={ea.image} alt={ea.title} className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
-                                        <BookMarked className="text-white/30" size={64} />
+                                        <Bot className="text-white/30" size={64} />
                                     </div>
                                 )}
-                                {ebook.is_featured && (
-                                    <span className="absolute top-3 left-3 bg-amber-500 text-white px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
-                                        <Star size={12} /> แนะนำ
+                                <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                                    {ea.is_featured && (
+                                        <span className="bg-amber-500 text-white px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 shadow">
+                                            <Star size={12} /> แนะนำ
+                                        </span>
+                                    )}
+                                    <span className="bg-black/50 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">
+                                        {ea.platform}
                                     </span>
-                                )}
-                                {!ebook.is_published && (
-                                    <div className="absolute top-3 right-3 bg-gray-800/80 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">
-                                        ร่าง
-                                    </div>
-                                )}
+                                </div>
                             </div>
 
                             {/* Info */}
                             <div className="p-5">
-                                <h3 className="font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-teal-600 transition-colors">{ebook.title}</h3>
-                                {ebook.author && <p className="text-sm text-gray-500 mb-3">โดย {ebook.author}</p>}
+                                <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">{ea.title}</h3>
 
                                 <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
                                     <span className="flex items-center gap-1">
-                                        <Download size={14} /> {(ebook.downloads_count || 0).toLocaleString()}
+                                        <Download size={14} /> {(ea.downloads_count || 0).toLocaleString()}
                                     </span>
                                     <span className="flex items-center gap-1">
-                                        <Star size={14} className="text-amber-500" /> {ebook.average_rating || 0}
+                                        <Star size={14} className="text-amber-500" /> {ea.average_rating || 0}
                                     </span>
                                 </div>
 
                                 <div className="flex items-center justify-between mb-4">
-                                    <span className="text-xl font-bold text-teal-600">
-                                        {ebook.price === 0 ? 'ฟรี' : `฿${Number(ebook.price).toLocaleString()}`}
+                                    <span className="text-xl font-bold text-purple-600">
+                                        {ea.price === 0 ? 'ฟรี' : `฿${Number(ea.price).toLocaleString()}`}
                                     </span>
-                                    <span className="text-sm text-gray-400 uppercase">{ebook.format}</span>
                                 </div>
 
                                 {/* Actions */}
                                 <div className="flex items-center gap-2 pt-4 border-t border-gray-100">
-                                    <button onClick={() => openViewModal(ebook)} className="flex-1 p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all flex items-center justify-center gap-1.5 text-sm font-medium">
+                                    <button onClick={() => openViewModal(ea)} className="flex-1 p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all flex items-center justify-center gap-1.5 text-sm font-medium">
                                         <Eye size={16} /> ดู
                                     </button>
-                                    <button onClick={() => openEditModal(ebook)} className="flex-1 p-2.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all flex items-center justify-center gap-1.5 text-sm font-medium">
+                                    <button onClick={() => openEditModal(ea)} className="flex-1 p-2.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all flex items-center justify-center gap-1.5 text-sm font-medium">
                                         <Edit size={16} /> แก้ไข
                                     </button>
-                                    <button onClick={() => handleDelete(ebook)} className="p-2.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
+                                    <button onClick={() => handleDelete(ea)} className="p-2.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
@@ -260,9 +257,9 @@ export default function EbooksPage() {
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
                     <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden my-8">
                         {/* Modal Header */}
-                        <div className="bg-gradient-to-r from-teal-500 to-emerald-600 px-6 py-5 flex items-center justify-between">
+                        <div className="bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-5 flex items-center justify-between">
                             <h2 className="text-xl font-bold text-white">
-                                {modalMode === 'create' ? 'เพิ่ม E-book ใหม่' : modalMode === 'edit' ? 'แก้ไข E-book' : 'รายละเอียด E-book'}
+                                {modalMode === 'create' ? 'เพิ่ม EA ใหม่' : modalMode === 'edit' ? 'แก้ไข EA' : 'รายละเอียด EA'}
                             </h2>
                             <button onClick={() => setShowModal(false)} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
                                 <X className="text-white" size={20} />
@@ -271,35 +268,42 @@ export default function EbooksPage() {
 
                         {/* Modal Body */}
                         <div className="p-6 max-h-[70vh] overflow-y-auto">
-                            {modalMode === 'view' && selectedEbook ? (
+                            {modalMode === 'view' && selectedEA ? (
                                 <div className="space-y-6">
-                                    <h3 className="text-2xl font-bold text-gray-900">{selectedEbook.title}</h3>
-                                    <p className="text-gray-600">{selectedEbook.description || 'ไม่มีคำอธิบาย'}</p>
+                                    <h3 className="text-2xl font-bold text-gray-900">{selectedEA.title}</h3>
+                                    <p className="text-gray-600">{selectedEA.description || 'ไม่มีคำอธิบาย'}</p>
 
                                     <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-2xl p-5">
                                         <div>
                                             <p className="text-sm text-gray-500">ราคา</p>
-                                            <p className="text-xl font-bold text-teal-600">฿{Number(selectedEbook.price).toLocaleString()}</p>
+                                            <p className="text-xl font-bold text-purple-600">฿{Number(selectedEA.price).toLocaleString()}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-500">รูปแบบ</p>
-                                            <p className="font-medium text-gray-900 uppercase">{selectedEbook.format}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">หน้า</p>
-                                            <p className="font-medium text-gray-900">{selectedEbook.pages || '-'}</p>
+                                            <p className="text-sm text-gray-500">แพลตฟอร์ม</p>
+                                            <p className="font-medium text-gray-900">{selectedEA.platform}</p>
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">ดาวน์โหลด</p>
-                                            <p className="font-medium text-gray-900">{(selectedEbook.downloads_count || 0).toLocaleString()}</p>
+                                            <p className="font-medium text-gray-900">{(selectedEA.downloads_count || 0).toLocaleString()}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">คะแนน</p>
+                                            <p className="font-medium text-gray-900 flex items-center gap-1"><Star className="text-amber-500" size={16} /> {selectedEA.average_rating || 0}</p>
                                         </div>
                                     </div>
+
+                                    {selectedEA.strategy && (
+                                        <div className="bg-purple-50 rounded-xl p-4">
+                                            <p className="text-sm font-semibold text-purple-800 mb-2">กลยุทธ์</p>
+                                            <p className="text-sm text-gray-700">{selectedEA.strategy}</p>
+                                        </div>
+                                    )}
 
                                     <div className="flex gap-3">
                                         <button onClick={() => setShowModal(false)} className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
                                             ปิด
                                         </button>
-                                        <button onClick={() => openEditModal(selectedEbook)} className="flex-1 px-4 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2">
+                                        <button onClick={() => openEditModal(selectedEA)} className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2">
                                             <Edit size={18} /> แก้ไข
                                         </button>
                                     </div>
@@ -308,26 +312,14 @@ export default function EbooksPage() {
                                 <form onSubmit={handleSubmit} className="space-y-5">
                                     {/* Title */}
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">ชื่อ E-book *</label>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">ชื่อ EA *</label>
                                         <input
                                             type="text"
                                             value={formData.title}
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
-                                            placeholder="ชื่อ E-book"
+                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-gray-700"
+                                            placeholder="ชื่อ Expert Advisor"
                                             required
-                                        />
-                                    </div>
-
-                                    {/* Author */}
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">ผู้แต่ง</label>
-                                        <input
-                                            type="text"
-                                            value={formData.author}
-                                            onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
-                                            placeholder="ชื่อผู้แต่ง"
                                         />
                                     </div>
 
@@ -338,12 +330,12 @@ export default function EbooksPage() {
                                             value={formData.description}
                                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                             rows={3}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700 resize-none"
-                                            placeholder="คำอธิบาย E-book..."
+                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-gray-700 resize-none"
+                                            placeholder="คำอธิบาย EA..."
                                         />
                                     </div>
 
-                                    {/* Price & Pages */}
+                                    {/* Price & Platform */}
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-semibold text-gray-700 mb-2">ราคา (บาท)</label>
@@ -353,35 +345,35 @@ export default function EbooksPage() {
                                                     type="number"
                                                     value={formData.price}
                                                     onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                                                    className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
+                                                    className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-gray-700"
                                                     min="0"
                                                 />
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">จำนวนหน้า</label>
-                                            <input
-                                                type="number"
-                                                value={formData.pages}
-                                                onChange={(e) => setFormData({ ...formData, pages: parseInt(e.target.value) || 0 })}
-                                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
-                                                min="0"
-                                            />
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">แพลตฟอร์ม</label>
+                                            <select
+                                                value={formData.platform}
+                                                onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-gray-700 bg-white"
+                                            >
+                                                <option value="MT4">MT4</option>
+                                                <option value="MT5">MT5</option>
+                                                <option value="MT4/MT5">MT4/MT5</option>
+                                            </select>
                                         </div>
                                     </div>
 
-                                    {/* Format */}
+                                    {/* Strategy */}
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">รูปแบบไฟล์</label>
-                                        <select
-                                            value={formData.format}
-                                            onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700 bg-white"
-                                        >
-                                            <option value="pdf">PDF</option>
-                                            <option value="epub">EPUB</option>
-                                            <option value="mobi">MOBI</option>
-                                        </select>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">กลยุทธ์</label>
+                                        <textarea
+                                            value={formData.strategy}
+                                            onChange={(e) => setFormData({ ...formData, strategy: e.target.value })}
+                                            rows={2}
+                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-gray-700 resize-none"
+                                            placeholder="อธิบายกลยุทธ์การเทรด..."
+                                        />
                                     </div>
 
                                     {/* Toggles */}
@@ -391,7 +383,7 @@ export default function EbooksPage() {
                                                 type="checkbox"
                                                 checked={formData.is_published}
                                                 onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
-                                                className="w-5 h-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                                                className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                                             />
                                             <span className="text-gray-700 font-medium">เผยแพร่</span>
                                         </label>
@@ -411,7 +403,7 @@ export default function EbooksPage() {
                                         <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
                                             ยกเลิก
                                         </button>
-                                        <button type="submit" disabled={isSaving} className="flex-1 px-4 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2 disabled:opacity-50">
+                                        <button type="submit" disabled={isSaving} className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2 disabled:opacity-50">
                                             {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                                             {modalMode === 'create' ? 'เพิ่ม' : 'บันทึก'}
                                         </button>

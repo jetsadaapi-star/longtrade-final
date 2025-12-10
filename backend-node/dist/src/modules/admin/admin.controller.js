@@ -136,6 +136,30 @@ let AdminController = class AdminController {
     async updateSiteSettings(data) {
         return this.adminService.updateSiteSettings(data);
     }
+    async getEnrollments(page, limit, status) {
+        return this.adminService.getEnrollments(parseInt(page || '1'), parseInt(limit || '10'), status);
+    }
+    async getEnrollmentById(id) {
+        return this.adminService.getEnrollmentById(BigInt(id));
+    }
+    async updateEnrollment(id, data) {
+        return this.adminService.updateEnrollment(BigInt(id), data);
+    }
+    async getPromotions(page, limit) {
+        return this.adminService.getPromotions(parseInt(page || '1'), parseInt(limit || '10'));
+    }
+    async getPromotionById(id) {
+        return this.adminService.getPromotionById(BigInt(id));
+    }
+    async createPromotion(data) {
+        return this.adminService.createPromotion(data);
+    }
+    async updatePromotion(id, data) {
+        return this.adminService.updatePromotion(BigInt(id), data);
+    }
+    async deletePromotion(id) {
+        return this.adminService.deletePromotion(BigInt(id));
+    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -467,6 +491,75 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "updateSiteSettings", null);
+__decorate([
+    (0, common_1.Get)('enrollments'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all enrollments' }),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getEnrollments", null);
+__decorate([
+    (0, common_1.Get)('enrollments/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get enrollment by ID' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getEnrollmentById", null);
+__decorate([
+    (0, common_1.Put)('enrollments/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update enrollment' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "updateEnrollment", null);
+__decorate([
+    (0, common_1.Get)('promotions'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all promotions' }),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getPromotions", null);
+__decorate([
+    (0, common_1.Get)('promotions/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get promotion by ID' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getPromotionById", null);
+__decorate([
+    (0, common_1.Post)('promotions'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new promotion' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "createPromotion", null);
+__decorate([
+    (0, common_1.Put)('promotions/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update promotion' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "updatePromotion", null);
+__decorate([
+    (0, common_1.Delete)('promotions/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete promotion' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "deletePromotion", null);
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('Admin'),
     (0, common_1.Controller)('v1/admin'),

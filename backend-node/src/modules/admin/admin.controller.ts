@@ -286,4 +286,62 @@ export class AdminController {
     async updateSiteSettings(@Body() data: any) {
         return this.adminService.updateSiteSettings(data);
     }
+
+    // ========================= ENROLLMENTS =========================
+    @Get('enrollments')
+    @ApiOperation({ summary: 'Get all enrollments' })
+    async getEnrollments(
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+        @Query('status') status?: string,
+    ) {
+        return this.adminService.getEnrollments(parseInt(page || '1'), parseInt(limit || '10'), status);
+    }
+
+    @Get('enrollments/:id')
+    @ApiOperation({ summary: 'Get enrollment by ID' })
+    async getEnrollmentById(@Param('id') id: string) {
+        return this.adminService.getEnrollmentById(BigInt(id));
+    }
+
+    @Put('enrollments/:id')
+    @ApiOperation({ summary: 'Update enrollment' })
+    async updateEnrollment(@Param('id') id: string, @Body() data: any) {
+        return this.adminService.updateEnrollment(BigInt(id), data);
+    }
+
+    // ========================= PROMOTIONS =========================
+    @Get('promotions')
+    @ApiOperation({ summary: 'Get all promotions' })
+    async getPromotions(
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+    ) {
+        return this.adminService.getPromotions(parseInt(page || '1'), parseInt(limit || '10'));
+    }
+
+    @Get('promotions/:id')
+    @ApiOperation({ summary: 'Get promotion by ID' })
+    async getPromotionById(@Param('id') id: string) {
+        return this.adminService.getPromotionById(BigInt(id));
+    }
+
+    @Post('promotions')
+    @ApiOperation({ summary: 'Create a new promotion' })
+    async createPromotion(@Body() data: any) {
+        return this.adminService.createPromotion(data);
+    }
+
+    @Put('promotions/:id')
+    @ApiOperation({ summary: 'Update promotion' })
+    async updatePromotion(@Param('id') id: string, @Body() data: any) {
+        return this.adminService.updatePromotion(BigInt(id), data);
+    }
+
+    @Delete('promotions/:id')
+    @ApiOperation({ summary: 'Delete promotion' })
+    async deletePromotion(@Param('id') id: string) {
+        return this.adminService.deletePromotion(BigInt(id));
+    }
 }
+

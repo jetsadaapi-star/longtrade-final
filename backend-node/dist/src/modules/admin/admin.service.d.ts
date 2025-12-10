@@ -890,4 +890,133 @@ export declare class AdminService {
         success: boolean;
         message: string;
     }>;
+    getEnrollments(page?: number, limit?: number, status?: string): Promise<{
+        data: {
+            id: string;
+            user_id: string;
+            course_id: string;
+            users: {
+                id: string;
+                name: string;
+                email: string;
+            } | null;
+            courses: {
+                id: string;
+                title: string;
+            } | null;
+            created_at: Date | null;
+            updated_at: Date | null;
+            coupon_id: bigint | null;
+            enrollment_date: Date;
+            completion_date: Date | null;
+            status: import(".prisma/client").$Enums.enrollments_status;
+            payment_status: import(".prisma/client").$Enums.enrollments_payment_status;
+            progress_percentage: import("@prisma/client/runtime/library").Decimal;
+            original_price: import("@prisma/client/runtime/library").Decimal;
+            final_price: import("@prisma/client/runtime/library").Decimal;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    }>;
+    getEnrollmentById(id: bigint): Promise<{
+        id: string;
+        user_id: string;
+        course_id: string;
+        courses: {
+            id: bigint;
+            title: string;
+        };
+        users: {
+            id: bigint;
+            name: string;
+            email: string;
+        };
+        created_at: Date | null;
+        updated_at: Date | null;
+        coupon_id: bigint | null;
+        enrollment_date: Date;
+        completion_date: Date | null;
+        status: import(".prisma/client").$Enums.enrollments_status;
+        payment_status: import(".prisma/client").$Enums.enrollments_payment_status;
+        progress_percentage: import("@prisma/client/runtime/library").Decimal;
+        original_price: import("@prisma/client/runtime/library").Decimal;
+        final_price: import("@prisma/client/runtime/library").Decimal;
+    } | null>;
+    updateEnrollment(id: bigint, data: any): Promise<{
+        id: string;
+        created_at: Date | null;
+        updated_at: Date | null;
+        user_id: bigint;
+        course_id: bigint;
+        coupon_id: bigint | null;
+        enrollment_date: Date;
+        completion_date: Date | null;
+        status: import(".prisma/client").$Enums.enrollments_status;
+        payment_status: import(".prisma/client").$Enums.enrollments_payment_status;
+        progress_percentage: import("@prisma/client/runtime/library").Decimal;
+        original_price: import("@prisma/client/runtime/library").Decimal;
+        final_price: import("@prisma/client/runtime/library").Decimal;
+    }>;
+    getPromotions(page?: number, limit?: number): Promise<{
+        data: {
+            id: string;
+            name: string;
+            code: string;
+            type: string;
+            discount_type: import(".prisma/client").$Enums.coupons_type;
+            discount_value: number;
+            min_purchase: number | null;
+            max_discount: number | null;
+            usage_limit: number | null;
+            used_count: number;
+            starts_at: Date | null;
+            expires_at: Date | null;
+            is_active: boolean;
+            created_at: Date | null;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    }>;
+    getPromotionById(id: bigint): Promise<{
+        id: string;
+        name: string;
+        code: string;
+        discount_type: import(".prisma/client").$Enums.coupons_type;
+        discount_value: number;
+        is_active: boolean;
+    } | null>;
+    createPromotion(data: any): Promise<{
+        id: string;
+        discount_value: number;
+        deleted_at: Date | null;
+        created_at: Date | null;
+        updated_at: Date | null;
+        description: string | null;
+        type: import(".prisma/client").$Enums.coupons_type;
+        is_active: boolean;
+        code: string;
+        value: import("@prisma/client/runtime/library").Decimal;
+        min_purchase: import("@prisma/client/runtime/library").Decimal;
+        max_discount: import("@prisma/client/runtime/library").Decimal | null;
+        usage_limit: number | null;
+        used_count: number;
+        valid_from: Date | null;
+        valid_until: Date | null;
+    }>;
+    updatePromotion(id: bigint, data: any): Promise<{
+        id: string;
+        discount_value: number;
+    }>;
+    deletePromotion(id: bigint): Promise<{
+        success: boolean;
+        message: string;
+    }>;
 }
